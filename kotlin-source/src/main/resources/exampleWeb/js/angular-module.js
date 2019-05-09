@@ -129,7 +129,7 @@ app.controller('CreateAuctionCtrl', function ($http, $location, $uibModalInstanc
                 AuctionParticipants = modalInstance.form.auctionParticipants.join('$');
             }
 
-            const createAuctionEndpoint = `${apiBaseURL}create-auction?itemName=${modalInstance.form.itemName}&ItemDescription=${modalInstance.form.itemDescription}&startPrice=${modalInstance.form.startPrice}&ExpiryDate=${modalInstance.form.expiryDate}&AuctionParticipants=${AuctionParticipants}`;
+            const createAuctionEndpoint = `${apiBaseURL}create-auction?itemName=${modalInstance.form.itemName}&ItemDescription=${modalInstance.form.itemDescription}&capitalToBeRaised=${modalInstance.form.capitalToBeRaised}&allocation=${modalInstance.form.allocation}&ExpiryDate=${modalInstance.form.expiryDate}&AuctionParticipants=${AuctionParticipants}`;
             // Create Auction and handle success / fail responses.
             $http.put(createAuctionEndpoint).then(
                 (result) => {
@@ -182,7 +182,7 @@ app.controller('BidModalCtrl', function ($http, $location, $uibModalInstance, $u
             modalInstance.formError = false;
             $uibModalInstance.close();
 
-            const createAuctionEndpoint = `${apiBaseURL}make-bid?amount=${modalInstance.form.amount}&AuctionReference=${demoApp.currentAuctionId}`;
+            const createAuctionEndpoint = `${apiBaseURL}make-bid?amount=${modalInstance.form.amount}&size=${modalInstance.form.size}&AuctionReference=${demoApp.currentAuctionId}`;
             
             // Create Bid and handle success / fail responses.
             $http.put(createAuctionEndpoint).then(

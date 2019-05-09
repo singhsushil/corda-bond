@@ -101,13 +101,13 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
      */
     @PUT
     @Path("create-auction")
-    fun createAuction(@QueryParam("itemName") itemName: String,@QueryParam("ItemDescription") ItemDescription: String,@QueryParam("startCapitalAmount") startCapitalAmount: Double,@QueryParam("endCapitalAmount") endCapitalAmount: Double,@QueryParam("allocation") allocation: String,@QueryParam("ExpiryDate") ExpiryDate: String,@QueryParam("AuctionParticipants") AuctionParticipants: String): Response {
-        if (startCapitalAmount <= 0 ) {
+    fun createAuction(@QueryParam("itemName") itemName: String,@QueryParam("ItemDescription") ItemDescription: String,@QueryParam("capitalToBeRaised") capitalToBeRaised: Double,@QueryParam("allocation") allocation: String,@QueryParam("ExpiryDate") ExpiryDate: String,@QueryParam("AuctionParticipants") AuctionParticipants: String): Response {
+        if (capitalToBeRaised <= 0 ) {
             return Response.status(BAD_REQUEST).entity("Query parameter 'start Price' must be non-negative.\n").build()
         }
 
         return try {
-            val signedTx = rpcOps.startTrackedFlow(::StartAuction, itemName, ItemDescription, startCapitalAmount,allocation,ExpiryDate, AuctionParticipants).returnValue.getOrThrow()
+            val signedTx = rpcOps.startTrackedFlow(::StartAuction, itemName, ItemDescription, capitalToBeRaised,allocation,ExpiryDate, AuctionParticipants).returnValue.getOrThrow()
             Response.status(CREATED).entity("Transaction id ${signedTx.id} committed to ledger.\n").build()
 
         } catch (ex: Throwable) {
@@ -121,13 +121,13 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
      */
     @PUT
     @Path("make-bid")
-    fun makeBid(@QueryParam("amount") amount: Double,@QueryParam("AuctionReference") AuctionReference: String): Response {
+    fun makeBid(@QueryParam("amount") amount: Double,@QueryParam("size") size: Int,@QueryParam("AuctionReference") AuctionReference: String): Response {
         if (AuctionReference == "" ) {
             return Response.status(BAD_REQUEST).entity("Query parameter 'Auction Reference' must not be null.\n").build()
         }
 
         return try {
-            val signedTx = rpcOps.startTrackedFlow(::Initiator,amount, AuctionReference,0).returnValue.getOrThrow()
+            val signedTx = rpcOps.startTrackedFlow(::Initiator,amount,size,AuctionReference).returnValue.getOrThrow()
             Response.status(CREATED).entity("Transaction id ${signedTx.id} committed to ledger.\n").build()
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)

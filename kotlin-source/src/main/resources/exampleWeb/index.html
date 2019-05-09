@@ -85,42 +85,28 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
                                         <div class="col-xs-7">
                                             <table class="table table-bordered">
                                                 <tr>
-                                                    <th>Item Name</th>
+                                                    <th>Bond Name</th>
                                                     <td>{{auction.itemName}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Item Description</th>
+                                                    <th>Bond Description</th>
                                                     <td>{{auction.itemDescription}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Expiry Date</th>
+                                                    <th>Issue Expiry Date</th>
                                                     <td>{{auction.expiryDate}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Auction Start Price</th>
-                                                    <td>{{auction.startPrice}}</td>
+                                                    <th>Issue size</th>
+                                                    <td>{{auction.capitalToBeRaised}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Highest bid</th>
-                                                    <td>
-                                                        <span ng-if="auction.highestBid==0">
-                                                            -
-                                                        </span>
-                                                        <span ng-if="auction.highestBid!=0">
-                                                            {{auction.highestBid}}
-                                                        </span>
-                                                    </td>
+                                                    <th>Status</th>
+                                                    <td>{{auction.State}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Highest Bid (participant)</th>
-                                                    <td>
-                                                        <span ng-if="auction.auctionWinner==null">
-                                                            -
-                                                        </span>
-                                                        <span ng-if="auction.auctionWinner!=null">
-                                                            {{auction.auctionWinner}}
-                                                        </span>
-                                                    </td>
+                                                    <th>Allocation expectations</th>
+                                                    <td>{{auction.allocation}}</td>
                                                 </tr>
                                             </table>
                                         </div>
@@ -171,7 +157,14 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
                                                     <th>Amount</th>
                                                     <td>{{bid.amount}}</td>
                                                 </tr>
-
+                                                <tr>
+                                                    <th>Size</th>
+                                                    <td>{{bid.size}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <td>{{bid.state}}</td>
+                                                </tr>
                                             </table>
                                         </div>
                                     </div>
@@ -212,11 +205,15 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
                     <input type="text" ng-model="modalInstance.form.itemDescription" class="form-control" id="itemDescription">
                 </div>
                 <div class="form-group">
-                    <label for="startPrice" class="control-label">Auction Start Price (Int):</label>
-                    <input type="text" ng-model="modalInstance.form.startPrice" class="form-control" id="startPrice">
+                    <label for="capitalToBeRaised" class="control-label">Target capital:</label>
+                    <input type="text" ng-model="modalInstance.form.capitalToBeRaised" class="form-control" id="capitalToBeRaised">
                 </div>
                 <div class="form-group">
-                    <label for="expiryDate" class="control-label">Expiry Date (Instant) (In Zulu format):</label>
+                    <label for="allocation" class="control-label">Client Allocation</label>
+                    <input type="text" ng-model="modalInstance.form.allocation" class="form-control" id="allocation">
+                </div>
+                <div class="form-group">
+                    <label for="expiryDate" class="control-label">Issue Expiry (In Zulu format):</label>
                     <input type="text" ng-model="modalInstance.form.expiryDate" class="form-control" id="expiryDate" placeholder="2018-12-31T00:00:00Z">
                 </div>
                 <div ng-show="modalInstance.formError" class="form-group">
@@ -243,8 +240,12 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
         <form>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="amount" class="control-label">Amount (Int):</label>
+                    <label for="amount" class="control-label">Amount (Double):</label>
                     <input type="text" ng-model="modalInstance.form.amount" class="form-control" id="amount">
+                </div>
+                <div class="form-group">
+                    <label for="size" class="control-label">Size (Int):</label>
+                    <input type="text" ng-model="modalInstance.form.size" class="form-control" id="size">
                 </div>
                 <div ng-show="modalInstance.formError" class="form-group">
                     <div class="alert alert-danger" role="alert">
