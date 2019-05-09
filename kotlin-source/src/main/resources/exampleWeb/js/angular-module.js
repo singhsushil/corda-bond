@@ -100,6 +100,13 @@ app.controller('AuctionAppController', function($http, $location, $uibModal) {
 
     demoApp.getAuctions();
 
+    demoApp.getBids = () => $http.get(apiBaseURL + "bids")
+            .then((response) => demoApp.bids = Object.keys(response.data)
+                .map((key) => response.data[key].state.data)
+                .reverse());
+
+        demoApp.getBids();
+
 });
 
 

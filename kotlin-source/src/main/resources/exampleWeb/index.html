@@ -32,7 +32,7 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
 <body ng-app="auctionAppModule" ng-controller="AuctionAppController as demoApp">
     <nav class="navbar navbar-default">
         <div class="container-fluid">
-            <div class="site-header">Auction - CorDapp</div>
+            <div class="site-header">Bond Issuance - CorDapp</div>
         </div>
     </nav>
 
@@ -141,6 +141,50 @@ COMING WEEKS WE'LL WRITE A TUTORIAL ON HOW BEST TO DO THIS.
     </div>
     <!-- Auction Listing Ends -->
 
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="panel-group" id="accordion1">
+                <div class="panel">
+                    <div class="panel-primary">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Bids:</h4>
+                        </div>
+                    </div>
+                    <div>
+                        <div ng-show="!demoApp.bids.length" class="panel-body">Use the "Create Bid" button to create a bid.</div>
+                        <div ng-repeat="bid in demoApp.bids" class="panel panel-default">
+
+                            <div class="panel-body panel-border">
+                                <div class="bidId">
+                                    <h4>Bid ID - {{bid.linearId.id}}</h4>
+                                </div>
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-xs-7">
+                                            <table class="table table-bordered">
+                                                <tr>
+                                                    <th>Bidder</th>
+                                                    <td>{{bid.bidder}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Amount</th>
+                                                    <td>{{bid.amount}}</td>
+                                                </tr>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+    <!-- Auction Listing Ends -->
 
     <!-- Create Auction Content Start -->
     <script type="text/ng-template" id="createAuctionModal.html">
