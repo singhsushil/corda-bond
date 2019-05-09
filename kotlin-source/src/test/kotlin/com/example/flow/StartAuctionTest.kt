@@ -10,11 +10,13 @@ class StartAuctionTests : AuctionTest() {
         get() = Auction(
             itemName = "test",
             ItemDescription = "test",
-            startPrice = 100,
+            capitalToBeRaised = 100.0,
+
+            State = "",
             ExpiryDate = fiveSecondsFromNow,
             itemOwner = a.legalIdentity(),
             AuctionActive = true,
-            highestBid = 0,
+            allocation = "",
             AuctionParticipants = listOf(b.legalIdentity(),c.legalIdentity())
     )
 
@@ -22,11 +24,12 @@ class StartAuctionTests : AuctionTest() {
         get() = Auction(
             itemName = "test2",
             ItemDescription = "test2",
-            startPrice = 100,
+            capitalToBeRaised = 100.0,
+            State = "",
             ExpiryDate = fiveSecondsFromNow,
             itemOwner = a.legalIdentity(),
             AuctionActive = true,
-            highestBid = 0,
+            allocation = "",
             AuctionParticipants = listOf()
         )
 
@@ -34,7 +37,7 @@ class StartAuctionTests : AuctionTest() {
     @Test
     fun `successfully start and broadcast to selected nodes`() {
         // Start a new Campaign.
-        val flow = StartAuction(johnsAuction.itemName,johnsAuction.ItemDescription,johnsAuction.startPrice,johnsAuction.ExpiryDate.toString(),johnsAuction.AuctionParticipants.joinToString(separator = "$"))
+        val flow = StartAuction(johnsAuction.itemName,johnsAuction.ItemDescription,johnsAuction.capitalToBeRaised,johnsAuction.allocation,johnsAuction.ExpiryDate.toString(),johnsAuction.AuctionParticipants.joinToString(separator = "$"))
         val auction = a.startFlow(flow).getOrThrow()
 
         // Extract the state from the transaction.
@@ -59,7 +62,7 @@ class StartAuctionTests : AuctionTest() {
     @Test
     fun `successfully start and broadcast campaign to all nodes`() {
         // Start a new Campaign.
-        val flow = StartAuction(janesAuction.itemName,janesAuction.ItemDescription,janesAuction.startPrice,janesAuction.ExpiryDate.toString(),"None")
+        val flow = StartAuction(janesAuction.itemName,janesAuction.ItemDescription,janesAuction.capitalToBeRaised,janesAuction.allocation,janesAuction.ExpiryDate.toString(),"None")
         val auction = a.startFlow(flow).getOrThrow()
 
         // Extract the state from the transaction.
