@@ -40,7 +40,7 @@ class AuctionContract : Contract {
         val auction = tx.outputStates.single() as Auction
 
         // Assert stuff over the state.
-        "A newly issued auction must have a positive start price." using (auction.startPrice > 0)
+
         "There must be a auction item name." using (auction.itemName != "")
 
         // Assert correct signers.
@@ -58,9 +58,9 @@ class AuctionContract : Contract {
 
         // Assert stuff about the bid in relation to the auction state.
         "The bid must be for this acution." using (bidOutput.auctionReference == auctionOutput.linearId)
-        "The auction must be updated by the amount bided." using (bidOutput.amount == auctionOutput.highestBid)
-        "The bid must be higher than start price" using (bidOutput.amount > auctionOutput.startPrice)
-        "The bid must be higher than highest bid" using (bidOutput.amount > auctionInput.highestBid)
+
+
+
 
         // Assert correct signer.
         "The auction must be signed by the manager only." using (signers.contains(auctionInput.itemOwner.owningKey))

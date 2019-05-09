@@ -35,6 +35,7 @@ class BroadcastTransaction(val stx: SignedTransaction,val nodes: List<Party>) : 
 
         // Create a session for each remaining party.
         val sessions = everyoneButMeAndNotary.map { initiateFlow(it) }
+        //Broadcast transaction
 
         // Send the transaction to all the remaining parties.
         sessions.forEach { subFlow(SendTransactionFlow(it, stx)) }

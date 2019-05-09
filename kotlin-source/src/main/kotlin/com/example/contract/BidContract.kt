@@ -38,9 +38,7 @@ class BidContract : Contract {
 
         // Assert stuff about the bid in relation to the auction state.
         "The bid must be for this auction." using (bidOutput.auctionReference == auctionOutput.linearId)
-        "The auction must be updated by the amount bid." using (bidOutput.amount == auctionOutput.highestBid)
-        "The bid must be higher than start price" using (bidOutput.amount > auctionOutput.startPrice)
-        "The bid must be higher than highest bid" using (bidOutput.amount > auctionInput.highestBid)
+
 
         // Assert correct signer.
         "The auction must be signed by the manager and bidder." using (signers.containsAll(listOf(auctionInput.itemOwner.owningKey,bidOutput.bidder.owningKey)))

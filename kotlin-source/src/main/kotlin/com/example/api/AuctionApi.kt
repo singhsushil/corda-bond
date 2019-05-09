@@ -20,6 +20,7 @@ import com.example.state.Auction
 import com.example.flow.StartAuction
 import com.example.flow.EndAuction
 import com.example.flow.MakeBid.Initiator
+import com.example.state.Bid
 import net.corda.core.identity.Party
 import net.corda.core.contracts.UniqueIdentifier
 
@@ -66,6 +67,14 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
     fun getAuctions() = rpcOps.vaultQueryBy<Auction>().states
 
     /**
+     * Displays all bids states that exist in the node's vault.
+     */
+    @GET
+    @Path("bids")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun getBids() = rpcOps.vaultQueryBy<Bid>().states
+
+    /**
      * Get full Auction details.
      */
     @GET
@@ -92,14 +101,15 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
      */
     @PUT
     @Path("create-auction")
-    fun createAuction(@QueryParam("itemName") itemName: String,@QueryParam("ItemDescription") ItemDescription: String,@QueryParam("startPrice") startPrice: Int,@QueryParam("ExpiryDate") ExpiryDate: String,@QueryParam("AuctionParticipants") AuctionParticipants: String): Response {
-        if (startPrice <= 0 ) {
+    fun createAuction(@QueryParam("itemName") itemName: String,@QueryParam("ItemDescription") ItemDescription: String,@QueryParam("startCapitalAmount") startCapitalAmount: Double,@QueryParam("endCapitalAmount") endCapitalAmount: Double,@QueryParam("allocation") allocation: String,@QueryParam("ExpiryDate") ExpiryDate: String,@QueryParam("AuctionParticipants") AuctionParticipants: String): Response {
+        if (startCapitalAmount <= 0 ) {
             return Response.status(BAD_REQUEST).entity("Query parameter 'start Price' must be non-negative.\n").build()
         }
 
         return try {
-            val signedTx = rpcOps.startTrackedFlow(::StartAuction, itemName, ItemDescription, startPrice, ExpiryDate, AuctionParticipants).returnValue.getOrThrow()
+            val signedTx = rpcOps.startTrackedFlow(::StartAuction, itemName, ItemDescription, startCapitalAmount,allocation,ExpiryDate, AuctionParticipants).returnValue.getOrThrow()
             Response.status(CREATED).entity("Transaction id ${signedTx.id} committed to ledger.\n").build()
+
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
             Response.status(BAD_REQUEST).entity(ex.message!!).build()
@@ -111,13 +121,13 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
      */
     @PUT
     @Path("make-bid")
-    fun makeBid(@QueryParam("amount") amount: Int,@QueryParam("AuctionReference") AuctionReference: String): Response {
+    fun makeBid(@QueryParam("amount") amount: Double,@QueryParam("AuctionReference") AuctionReference: String): Response {
         if (AuctionReference == "" ) {
             return Response.status(BAD_REQUEST).entity("Query parameter 'Auction Reference' must not be null.\n").build()
         }
 
         return try {
-            val signedTx = rpcOps.startTrackedFlow(::Initiator, amount, AuctionReference).returnValue.getOrThrow()
+            val signedTx = rpcOps.startTrackedFlow(::Initiator,amount, AuctionReference,0).returnValue.getOrThrow()
             Response.status(CREATED).entity("Transaction id ${signedTx.id} committed to ledger.\n").build()
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)

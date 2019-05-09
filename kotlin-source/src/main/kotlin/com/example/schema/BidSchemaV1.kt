@@ -29,16 +29,24 @@ object BidSchemaV1 : MappedSchema(
             var bidder: String,
 
             @Column(name = "amount")
-            var amount: Int,
+            var amount: Double,
+
+            @Column(name = "Size")
+            var Size: Int,
 
             @Column(name = "auctionReference")
             var auctionReference: String,
 
+            @Column(name = "state")
+            var state: String,
+
             @Column(name = "linear_id")
             var linearId: String
 
+
+
     ) : PersistentState() {
         // Default constructor required by hibernate.
-        constructor(): this("", "", 0,"",UUID.randomUUID().toString())
+        constructor(): this("", "", 0.0, 0,"","",UUID.randomUUID().toString())
     }
 }

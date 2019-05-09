@@ -10,10 +10,12 @@ import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
 
 data class Bid(
-        val amount: Int,
+        val amount: Double,
+        val size: Int,
         val bidder: Party,
         val itemOwner: Party,
         val auctionReference: UniqueIdentifier,
+        val state:String,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState, QueryableState {
     override val participants: List<AbstractParty> = listOf(bidder,itemOwner)
@@ -24,7 +26,9 @@ data class Bid(
                     this.itemOwner.name.toString(),
                     this.bidder.name.toString(),
                     this.amount,
+                    this.size,
                     this.auctionReference.id.toString(),
+                    this.state,
                     this.linearId.id.toString()
             )
             else -> throw IllegalArgumentException("Unrecognised schema $schema")

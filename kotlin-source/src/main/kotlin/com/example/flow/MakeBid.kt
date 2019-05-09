@@ -34,8 +34,9 @@ object MakeBid {
     @StartableByRPC
     @InitiatingFlow
     class Initiator(
-            private val amount: Int,
-            private val AuctionReference: String
+            private val amount: Double,
+            private val AuctionReference: String,
+            private val size: Int
     ) : FlowLogic<SignedTransaction>() {
 
 
@@ -87,9 +88,9 @@ object MakeBid {
             val createAuctionCommand = Command(BidContract.Create(), listOf(ourIdentity.owningKey, auctionState.itemOwner.owningKey))
 
             // Output states:
-            val bidOutputState = Bid(amount, serviceHub.myInfo.legalIdentities.first(), auctionState.itemOwner, UniqueIdentifier.fromString(AuctionReference))
+            val bidOutputState = Bid(amount, size ,serviceHub.myInfo.legalIdentities.first(),auctionState.itemOwner,UniqueIdentifier.fromString(AuctionReference),"")
             val bitOutputStateAndContract = StateAndContract(bidOutputState, BidContract.CONTRACT_REF)
-            val auctionOutputState = auctionState.copy(highestBid=amount,auctionWinner=serviceHub.myInfo.legalIdentities.first())
+            val auctionOutputState = auctionState.copy()
             val auctionOutputStateAndContract = StateAndContract(auctionOutputState, AuctionContract.CONTRACT_REF)
 
             // Build the transaction.
