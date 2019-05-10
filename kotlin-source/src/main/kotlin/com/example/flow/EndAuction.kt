@@ -28,6 +28,7 @@ import kotlin.collections.ArrayList
  * This flow deals with ending the auction
  */
 @SchedulableFlow
+@InitiatingFlow
 @StartableByRPC
 class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() {
 
@@ -91,9 +92,6 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 endAuctionCommand  // Command
         )
 
-
-
-
         if (auctionOutputState.State == "SUCCESS") {
             var allocation = createAllocation(bids, auctionState.capitalToBeRaised)
             for (item in allocation) {
@@ -101,8 +99,12 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
 
                 val bidOutputState = Bid(item.amount, item.size ,item.bidder,auctionState.itemOwner,UniqueIdentifier.fromString(AuctionReference),"ALLOTTED")
                 val bitOutputStateAndContract = StateAndContract(bidOutputState, BidContract.CONTRACT_REF)
+                val acceptAuctionCommand = Command(AuctionContract.AcceptBid(), auctionState.itemOwner.owningKey)
+                val createbidCommand = Command(BidContract.Create(), listOf(ourIdentity.owningKey, auctionState.itemOwner.owningKey))
                 val utxBid = TransactionBuilder(notary = notary).withItems(
-                        bitOutputStateAndContract // Output
+                        bitOutputStateAndContract, // Output
+                        createbidCommand,  // Command
+                        acceptAuctionCommand //command
                 )
 
                 utx.setTimeWindow(Instant.now(), 30.seconds)
@@ -147,9 +149,7 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 for (bid in bids) {
                     list.add(bid.state.data)
                     logger.info("putting the bid state for " + bid.state.data.bidder.toString() + "in the map with the bid value" + bid.state.data.amount.toString() + bid.state.data.size.toString())
-                    //println(bid.state.data.amount)
-                    //println(bid.state.data.size)
-                    //println(bid.state.data.bidder)
+
                 }
                 return list
         }
