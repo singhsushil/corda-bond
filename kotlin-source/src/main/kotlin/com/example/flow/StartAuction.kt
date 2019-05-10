@@ -29,7 +29,7 @@ import net.corda.core.utilities.ProgressTracker.Step
 @StartableByRPC
 class StartAuction( val itemName: String,
                     val ItemDescription: String,
-                    val capital: Double,
+                    val capitalToBeRaised: Double,
                     val allocation:String,
                     val ExpiryDate: String,
                     val AuctionParticipants: String) : FlowLogic<SignedTransaction>() {
@@ -89,7 +89,7 @@ class StartAuction( val itemName: String,
         progressTracker.currentStep = GENERATING_TRANSACTION
 
         // Assemble the transaction components.
-        val newAuction = Auction(itemName,ItemDescription,capital,allocation,Instant.parse(ExpiryDate),serviceHub.myInfo.legalIdentities.first(),  true,allAuctionParticipants,"")
+        val newAuction = Auction(itemName,ItemDescription,capitalToBeRaised,allocation,Instant.parse(ExpiryDate),serviceHub.myInfo.legalIdentities.first(),  true,allAuctionParticipants,"")
         val startCommand = Command(AuctionContract.Start(), listOf(ourIdentity.owningKey))
         val outputState = StateAndContract(newAuction, AuctionContract.CONTRACT_REF)
 

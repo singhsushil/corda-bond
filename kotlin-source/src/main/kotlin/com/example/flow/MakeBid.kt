@@ -35,8 +35,8 @@ object MakeBid {
     @InitiatingFlow
     class Initiator(
             private val amount: Double,
-            private val AuctionReference: String,
-            private val size: Int
+            private val size: Int,
+            private val AuctionReference: String
     ) : FlowLogic<SignedTransaction>() {
 
 

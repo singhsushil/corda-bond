@@ -107,7 +107,7 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
         }
 
         return try {
-            val signedTx = rpcOps.startTrackedFlow(::StartAuction, itemName, ItemDescription, capitalToBeRaised,allocation,ExpiryDate, AuctionParticipants).returnValue.getOrThrow()
+            val signedTx = rpcOps.startTrackedFlow(::StartAuction, itemName, ItemDescription, capitalToBeRaised,allocation,ExpiryDate,AuctionParticipants).returnValue.getOrThrow()
             Response.status(CREATED).entity("Transaction id ${signedTx.id} committed to ledger.\n").build()
 
         } catch (ex: Throwable) {
@@ -127,7 +127,7 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
         }
 
         return try {
-            val signedTx = rpcOps.startTrackedFlow(::Initiator,amount,AuctionReference,size).returnValue.getOrThrow()
+            val signedTx = rpcOps.startTrackedFlow(::Initiator,amount,size,AuctionReference).returnValue.getOrThrow()
             Response.status(CREATED).entity("Transaction id ${signedTx.id} committed to ledger.\n").build()
         } catch (ex: Throwable) {
             logger.error(ex.message, ex)
