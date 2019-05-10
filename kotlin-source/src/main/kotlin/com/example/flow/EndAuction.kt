@@ -118,16 +118,16 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 val acceptBidCommand = Command(AuctionContract.AcceptBid(), auctionState.itemOwner.owningKey)
                 val createbidCommand = Command(BidContract.Create(), listOf(item.bidder.owningKey, auctionState.itemOwner.owningKey))
 
-                val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(UniqueIdentifier.fromString(AuctionReference)))
-                val auctionInputStateAndRef = serviceHub.vaultService.queryBy<Auction>(queryCriteria).states.single()
-                val auctionOutputState = auctionInputStateAndRef.state.data
-                val auctionOutputStateAndContract = StateAndContract(auctionOutputState, AuctionContract.CONTRACT_REF)
+                val queryCriteria1 = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(UniqueIdentifier.fromString(AuctionReference)))
+                val auctionInputStateAndRef1 = serviceHub.vaultService.queryBy<Auction>(queryCriteria1).states.single()
+                val auctionOutputState1 = auctionInputStateAndRef.state.data
+                val auctionOutputStateAndContract1 = StateAndContract(auctionOutputState1, AuctionContract.CONTRACT_REF)
 
 
                 val utxBid = TransactionBuilder(notary = notary).withItems(
                         bitOutputStateAndContract, // Output
-                        auctionOutputStateAndContract,
-                        auctionInputStateAndRef,
+                        auctionOutputStateAndContract1,
+                        auctionInputStateAndRef1,
                         createbidCommand,  // Command
                         acceptBidCommand
                 )
