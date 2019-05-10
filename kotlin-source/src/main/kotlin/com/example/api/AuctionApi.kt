@@ -72,7 +72,7 @@ class AuctionApi(private val rpcOps: CordaRPCOps) {
     @GET
     @Path("bids")
     @Produces(MediaType.APPLICATION_JSON)
-    fun getBids() = rpcOps.vaultQueryBy<Bid>().states
+    fun getBids() = rpcOps.vaultQueryBy<Bid>(QueryCriteria.VaultQueryCriteria(Vault.StateStatus.UNCONSUMED)).states
 
     /**
      * Get full Auction details.
