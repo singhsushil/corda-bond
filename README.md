@@ -25,7 +25,7 @@ At this point you will have a notary node running as well as three other nodes a
 1. Start the Auction
 In PartyA Console type:
 ```
-start StartAuction itemName: "test", ItemDescription: "test", startPrice: 99, ExpiryDate: "2018-11-16T08:25:25.510045Z", AuctionParticipants: "O=PartyB,L=New York,C=US"
+start StartAuction itemName: "testAbhi7", ItemDescription: "test", capital: 999, allocation: "", ExpiryDate: "2019-11-16T08:25:25.510045Z", AuctionParticipants: "O=PartyB,L=New York,C=US"
 ```
 
 2. Get Linear Id of Auction
@@ -38,7 +38,7 @@ Above will output a auction LinearId
 3. Make A Bid
 In PartyB or PartyC Console type:
 ```
-start MakeBid amount: 120, AuctionReference: "<LinearId>"
+start MakeBid amount: 120, size: 10, AuctionReference: <linear_id>
 ```
 
 4. End A Auction
