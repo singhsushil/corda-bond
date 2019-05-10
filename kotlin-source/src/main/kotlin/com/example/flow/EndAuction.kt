@@ -22,6 +22,9 @@ import net.corda.confidential.IdentitySyncFlow
 import net.corda.core.utilities.seconds
 import java.time.Instant
 import kotlin.collections.ArrayList
+import net.corda.core.node.services.Vault
+import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
+import net.corda.core.utilities.unwrap
 
 
 /**
@@ -91,41 +94,58 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 auctionInputStateAndRef, // Input
                 endAuctionCommand  // Command
         )
+        utx.setTimeWindow(Instant.now(), 30.seconds)
+        //print(bids)
+        val stx = serviceHub.signInitialTransaction(utx)
+        val ftx = subFlow(FinalityFlow(stx))
+
+        // Broadcast this transaction to all parties on this business network.
+        subFlow(BroadcastTransaction(ftx, auctionState.AuctionParticipants))
+
+        // update bidders state - need bidders sign ?
 
         if (auctionOutputState.State == "SUCCESS") {
+
+            println(" updating bids now ....")
             var allocation = createAllocation(bids, auctionState.capitalToBeRaised)
             for (item in allocation) {
-                var result = serviceHub.vaultService.queryBy<Bid>()
 
-                val bidOutputState = Bid(item.amount, item.size ,item.bidder,auctionState.itemOwner,UniqueIdentifier.fromString(AuctionReference),"ALLOTTED")
+                println(" all bids ..")
+                println(item)
+                println(item.bidder.owningKey)
+                val bidOutputState = Bid(item.amount, item.size, item.bidder, auctionState.itemOwner, UniqueIdentifier.fromString(AuctionReference), "ALLOTTED")
                 val bitOutputStateAndContract = StateAndContract(bidOutputState, BidContract.CONTRACT_REF)
-                val acceptAuctionCommand = Command(AuctionContract.AcceptBid(), auctionState.itemOwner.owningKey)
-                val createbidCommand = Command(BidContract.Create(), listOf(ourIdentity.owningKey, auctionState.itemOwner.owningKey))
+                val acceptBidCommand = Command(AuctionContract.AcceptBid(), auctionState.itemOwner.owningKey)
+                val createbidCommand = Command(BidContract.Create(), listOf(item.bidder.owningKey, auctionState.itemOwner.owningKey))
+
+                val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(UniqueIdentifier.fromString(AuctionReference)))
+                val auctionInputStateAndRef = serviceHub.vaultService.queryBy<Auction>(queryCriteria).states.single()
+                val auctionOutputState = auctionInputStateAndRef.state.data
+                val auctionOutputStateAndContract = StateAndContract(auctionOutputState, AuctionContract.CONTRACT_REF)
+
+
                 val utxBid = TransactionBuilder(notary = notary).withItems(
                         bitOutputStateAndContract, // Output
+                        auctionOutputStateAndContract,
+                        auctionInputStateAndRef,
                         createbidCommand,  // Command
-                        acceptAuctionCommand //command
+                        acceptBidCommand
                 )
 
-                utx.setTimeWindow(Instant.now(), 30.seconds)
+                // Set the time for when this transaction happened.
+                utxBid.setTimeWindow(Instant.now(), 30.seconds)
+                println(" updating following bid ...bidder "+item.bidder+"  bidder owningKey "+item.bidder.owningKey+" owner owningKey "+auctionState.itemOwner)
 
                 // Sign, sync identiStartties, finalise and record the transaction.
                 val ptxBid = serviceHub.signInitialTransaction(builder = utxBid, signingPubKeys = listOf(ourIdentity.owningKey))
-                val session = initiateFlow(auctionState.itemOwner)
+                val session = initiateFlow(item.bidder)
                 subFlow(IdentitySyncFlow.Send(otherSide = session, tx = ptxBid.tx))
                 val stxBid = subFlow(CollectSignaturesFlow(ptxBid, setOf(session), listOf(ourIdentity.owningKey)))
-                val ftx = subFlow(FinalityFlow(stxBid))
-                // Send list of auction paricipants to broadcast transaction
-                session.sendAndReceive<Unit>(auctionState.AuctionParticipants)
+                val ftxBid = subFlow(FinalityFlow(stxBid))
+                println(" happy ending...." )
 
             }
         }
-            //print(bids)
-            val stx = serviceHub.signInitialTransaction(utx)
-            val ftx = subFlow(FinalityFlow(stx))
-
-            // Broadcast this transaction to all parties on this business network.
-            subFlow(BroadcastTransaction(ftx, auctionState.AuctionParticipants))
 
             return ftx
         }
@@ -141,8 +161,8 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
             }
 
             fun bookBuilding(): ArrayList<Bid> {
-
-                var result = serviceHub.vaultService.queryBy<Bid>()
+                val queryCriteria = VaultQueryCriteria(Vault.StateStatus.UNCONSUMED)
+                var result = serviceHub.vaultService.queryBy<Bid>(queryCriteria)
 
                 val bids = result.states;
                 val list = ArrayList<Bid>()
@@ -190,5 +210,22 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 //Check if the sort on price meets the condition If yes return the sorted map
 
             }
+
+    @InitiatedBy(EndAuction::class)
+    class Responder(val otherSession: FlowSession) : FlowLogic<Unit>() {
+
+        @Suspendable
+        override fun call() {
+            subFlow(IdentitySyncFlow.Receive(otherSideSession = otherSession))
+
+            // As the manager, we might want to do some checking of the bid before we sign it.
+            val flow = object : SignTransactionFlow(otherSession) {
+                override fun checkTransaction(stx: SignedTransaction) = Unit // TODO: Add some checks here.
+            }
+
+            val stx = subFlow(flow)
+        }
+
+    }
 
         }
