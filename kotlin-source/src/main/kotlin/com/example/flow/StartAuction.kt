@@ -89,7 +89,7 @@ class StartAuction( val itemName: String,
         progressTracker.currentStep = GENERATING_TRANSACTION
 
         // Assemble the transaction components.
-        val newAuction = Auction(itemName,ItemDescription,capitalToBeRaised,allocation,Instant.parse(ExpiryDate),serviceHub.myInfo.legalIdentities.first(),  true,allAuctionParticipants,"")
+        val newAuction = Auction(itemName,ItemDescription,capitalToBeRaised,allocation,Instant.parse(ExpiryDate),serviceHub.myInfo.legalIdentities.first(),  true,allAuctionParticipants,"OPEN")
         val startCommand = Command(AuctionContract.Start(), listOf(ourIdentity.owningKey))
         val outputState = StateAndContract(newAuction, AuctionContract.CONTRACT_REF)
 
