@@ -40,6 +40,9 @@ object BidSchemaV1 : MappedSchema(
             @Column(name = "state")
             var state: String,
 
+            @Column(name = "allotedPrice")
+            var allotedPrice: Double,
+
             @Column(name = "linear_id")
             var linearId: String
 
@@ -47,6 +50,6 @@ object BidSchemaV1 : MappedSchema(
 
     ) : PersistentState() {
         // Default constructor required by hibernate.
-        constructor(): this("", "", 0.0, 0,"","",UUID.randomUUID().toString())
+        constructor(): this("", "", 0.0, 0,"","",0.0,UUID.randomUUID().toString())
     }
 }

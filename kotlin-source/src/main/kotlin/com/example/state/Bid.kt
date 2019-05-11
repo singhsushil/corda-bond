@@ -16,6 +16,7 @@ data class Bid(
         val itemOwner: Party,
         val auctionReference: UniqueIdentifier,
         val state:String,
+        val allotedPrice:Double,
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState, QueryableState {
     override val participants: List<AbstractParty> = listOf(bidder,itemOwner)
@@ -29,6 +30,7 @@ data class Bid(
                     this.size,
                     this.auctionReference.id.toString(),
                     this.state,
+                    this.allotedPrice,
                     this.linearId.id.toString()
             )
             else -> throw IllegalArgumentException("Unrecognised schema $schema")

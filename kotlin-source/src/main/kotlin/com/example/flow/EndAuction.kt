@@ -104,7 +104,7 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
 
         // update bidders state - need bidders sign ?
 
-        if (auctionOutputState.State == "SUCCESS") {
+
 
             println(" updating bids now ....")
             var allocation = createAllocation(bids, auctionState.capitalToBeRaised)
@@ -113,21 +113,26 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 println(" all bids ..")
                 println(item)
                 println(item.bidder.owningKey)
-                val bidOutputState = Bid(item.amount, item.size, item.bidder, auctionState.itemOwner, UniqueIdentifier.fromString(AuctionReference), "ALLOTTED")
+                var status = "NOT ALLOTED"
+                if(auctionOutputState.State == "SUCCESS"){
+                    status = "ALLOTTED"
+                }
+                var weightedAverage = calculateWeightedAverage(allocation)
+                val bidOutputState = Bid(item.amount, item.size, item.bidder, auctionState.itemOwner, UniqueIdentifier.fromString(AuctionReference), status,weightedAverage)
                 val bitOutputStateAndContract = StateAndContract(bidOutputState, BidContract.CONTRACT_REF)
                 val acceptBidCommand = Command(AuctionContract.AcceptBid(), auctionState.itemOwner.owningKey)
                 val createbidCommand = Command(BidContract.Create(), listOf(item.bidder.owningKey, auctionState.itemOwner.owningKey))
 
-                val queryCriteria1 = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(UniqueIdentifier.fromString(AuctionReference)))
-                val auctionInputStateAndRef1 = serviceHub.vaultService.queryBy<Auction>(queryCriteria1).states.single()
-                val auctionOutputState1 = auctionInputStateAndRef.state.data
-                val auctionOutputStateAndContract1 = StateAndContract(auctionOutputState1, AuctionContract.CONTRACT_REF)
+                val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(UniqueIdentifier.fromString(AuctionReference)))
+                val auctionInputStateAndRef = serviceHub.vaultService.queryBy<Auction>(queryCriteria).states.single()
+                val auctionOutputState = auctionInputStateAndRef.state.data
+                val auctionOutputStateAndContract = StateAndContract(auctionOutputState, AuctionContract.CONTRACT_REF)
 
 
                 val utxBid = TransactionBuilder(notary = notary).withItems(
                         bitOutputStateAndContract, // Output
-                        auctionOutputStateAndContract1,
-                        auctionInputStateAndRef1,
+                        auctionOutputStateAndContract,
+                        auctionInputStateAndRef,
                         createbidCommand,  // Command
                         acceptBidCommand
                 )
@@ -143,19 +148,14 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 val stxBid = subFlow(CollectSignaturesFlow(ptxBid, setOf(session), listOf(ourIdentity.owningKey)))
                 val ftxBid = subFlow(FinalityFlow(stxBid))
                 println(" happy ending...." )
-
             }
-        }
-
             return ftx
         }
 
-
-
-           fun calculateTotalAmount(bids: ArrayList<Bid>): Double {
+        fun calculateTotalAmount(bids: ArrayList<Bid>): Double {
                 var amount = 0.0
                 for (bid in bids) {
-                    amount = bid.amount * bid.size
+                    amount += bid.amount * bid.size
                 }
                 return amount;
             }
@@ -173,40 +173,36 @@ class EndAuction(val AuctionReference: String) : FlowLogic<SignedTransaction>() 
                 }
                 return list
         }
+            fun calculateWeightedAverage(bids: ArrayList<Bid>):Double{
+                var weightedPrice = 0.0;
+                var totalSize = 0;
+                for(a in bids){
+                    weightedPrice = weightedPrice + a.amount*a.size
+                    totalSize = totalSize + a.size
+                }
+                weightedPrice = weightedPrice /totalSize
 
+                return weightedPrice
+            }
             fun createAllocation(bids: ArrayList<Bid>, startCapital: Double): ArrayList<Bid> {
 
                 val compareByPrice = { o1: Bid, o2: Bid -> o1.amount.compareTo(o2.amount) }
-                val compareByLot = { o1: Bid, o2: Bid -> o1.size.compareTo(o2.size) }
-
-                var sortLot = bids.stream().sorted(compareByLot)
-
-                var sortLotConnter = 0.0
-                var sortLotAmount = 0.0
-                var sortListFiter = ArrayList<Bid>()
-                for (b in sortLot) {
-                    sortLotAmount = sortLotAmount + b.amount * b.size
-                    sortLotConnter = sortLotConnter + 1;
-                    sortListFiter.add(b)
-                    if (sortLotAmount >= startCapital)
-                        break
-                }
                 var sortPrice = bids.stream().sorted(compareByPrice)
                 var sortPriceConnter = 0
                 var sortPriceAmount = 0.0
+
                 var sortListPriceFiter = ArrayList<Bid>()
                 for (b in sortPrice) {
                     sortPriceAmount = sortPriceAmount + b.amount * b.size
                     sortPriceConnter = sortPriceConnter + 1;
+
                     sortListPriceFiter.add(b)
-                    if (sortLotAmount >= startCapital)
+                    if (sortPriceAmount >= startCapital)
                         break
                 }
 
-                if (sortLotConnter > sortPriceConnter) {
-                    return sortListPriceFiter
-                }
-                return sortListFiter;
+
+                return sortListPriceFiter;
                 //Check if the sort on price meets the condition If yes return the sorted map
 
             }
