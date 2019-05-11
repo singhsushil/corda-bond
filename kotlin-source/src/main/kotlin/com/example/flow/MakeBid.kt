@@ -88,7 +88,7 @@ object MakeBid {
             val createAuctionCommand = Command(BidContract.Create(), listOf(ourIdentity.owningKey, auctionState.itemOwner.owningKey))
 
             // Output states:
-            val bidOutputState = Bid(amount, size ,serviceHub.myInfo.legalIdentities.first(),auctionState.itemOwner,UniqueIdentifier.fromString(AuctionReference),"",0.0)
+            val bidOutputState = Bid(amount, size ,serviceHub.myInfo.legalIdentities.first(),auctionState.itemOwner,UniqueIdentifier.fromString(AuctionReference),"OPEN",0.0)
             val bitOutputStateAndContract = StateAndContract(bidOutputState, BidContract.CONTRACT_REF)
             val auctionOutputState = auctionState.copy()
             val auctionOutputStateAndContract = StateAndContract(auctionOutputState, AuctionContract.CONTRACT_REF)
